@@ -1,15 +1,10 @@
-from select import select
-from socket import timeout
 import sys
-from tkinter import E
-from unittest import result
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import *
 from PyQt5.QtCore import QTimer
 
 import random
 import time
-import enum
 from queue import PriorityQueue
 import random
 from PyQt5.QtCore import QPropertyAnimation, QPoint
@@ -118,8 +113,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout(self.inWidget)
         self.vertical.addWidget(self.inWidget)
         self.CreateButtons()
-        self.LocateWalls(200)
-        self.LocateFoods(5)
+        self.LocateWalls(150)
+        self.LocateFoods(10)
         pacman = self.LocatePacMan()
         self.pacmanRow = pacman[0]
         self.pacmanColumn = pacman[1]
@@ -224,6 +219,9 @@ class MyWindow(QtWidgets.QMainWindow):
                 continue
                 
             for d in 'ESNW':
+                loop = QEventLoop()
+                QTimer.singleShot(2, loop.quit)
+                loop.exec_()
                 if d == 'E':
                     childcell = [currcell[0], currcell[1] + 1]
                 elif d == 'S':
@@ -316,6 +314,10 @@ class MyWindow(QtWidgets.QMainWindow):
             dicnode = (node[0], node[1])
             visited[dicnode] = True
             for d in 'ESNW':
+                loop = QEventLoop()
+                QTimer.singleShot(2, loop.quit)
+                loop.exec_()
+
                 if d == 'E':
                     childnode = [node[0], node[1] + 1]
                 elif d == 'S':
@@ -374,8 +376,8 @@ w.layout.addWidget(greenbutton,w.pacmanRow+1,w.pacmanColumn)
 
 startcell = [w.pacmanRow, w.pacmanColumn]
 
-# w.run(5, 'bfs', startcell)
-w.run(5, 'dfs', startcell)
+w.run(10, 'bfs', startcell)
+# w.run(10, 'dfs', startcell)
 
 # path = w.dfs()
 # res = w.bfs(startcell)
