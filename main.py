@@ -1,3 +1,4 @@
+from ast import In
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import *
@@ -56,73 +57,96 @@ class MyWindow(QtWidgets.QMainWindow):
         self.rows = 20
         self.columns = 30
         self.Buttons = [[0 for _ in range(self.columns)] for __ in range(self.rows)] 
+
         self.Styles = {
             "White": """
                 background-color:white;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                border :0.5px solid white;
                 """,
-            "Black": """
-                background-color:black;
+            "WallGray": """
+                background-color:#393a3b;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                border :0.5px solid gray;
                 """,
             "Orange":"""
                 background-color:orange;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                
+                border :0.5px solid orange;
                 """,
             "Yellow":"""
                 background-color:yellow;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                border :0.5px solid yellow;
                 """,
             "Gray":"""
                 background-color:#423e40;
                 max-height:35px;
                 max-width:35px;
-                border :0.50px solid gray;
+                border :0.50px solid #423e40;
                 """,
             "Green":"""
                 background-color:green;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                border :0.5px solid gray;
                 """,
             "Blue":"""
                 background-color:#03fc77;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                border :0.5px solid #03fc77;
                 """,
             "Red":"""
                 background-color:red;
                 max-height:35px;
                 max-width:35px;
-                border :0.45px solid gray;
+                
+                border :0.5px solid red;
                 """,
                 
             }
+        
         Widget= QtWidgets.QWidget()
         self.vertical = QtWidgets.QVBoxLayout()
         self.inWidget = QtWidgets.QWidget()
         self.layout = QtWidgets.QGridLayout(self.inWidget)
         self.vertical.addWidget(self.inWidget)
         self.CreateButtons()
-        self.LocateWalls(150)
-        self.LocateFoods(10)
-        pacman = self.LocatePacMan()
-        self.pacmanRow = pacman[0]
-        self.pacmanColumn = pacman[1]
-
-        self.direction = 'up'
+        
+        startcell = None
 
         Widget.setLayout(self.vertical)
         self.setCentralWidget(Widget)
+        
+        # Combo Boxes
+        combobox_algorithm = QtWidgets.QComboBox(self)
+        combobox_algorithm.setGeometry(50, 50, 60, 60)
+        combobox_algorithm.addItems(['bfs', 'dfs'])
+        self.vertical.addWidget(combobox_algorithm)
+
+        combobox_difficulty = QtWidgets.QComboBox(self)
+        combobox_difficulty.setGeometry(50, 50, 60, 60)
+        combobox_difficulty.addItems(['Easy', 'Standard', 'Hard'])
+        self.vertical.addWidget(combobox_difficulty)
+
+        combobox_food = QtWidgets.QComboBox(self)
+        combobox_food.setGeometry(50, 50, 60, 60)
+        combobox_food.addItems(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'])
+        self.vertical.addWidget(combobox_food)
+        
+        # Build Button
+        build_btn = QtWidgets.QPushButton("Build", clicked = lambda: self.buildMap(combobox_difficulty.currentText(), combobox_food.currentText()))
+        self.vertical.addWidget(build_btn)
+
+        # Start Button
+        start_btn = QtWidgets.QPushButton("Start", clicked = lambda: self.run(combobox_food.currentText(), combobox_algorithm.currentText()))
+        self.vertical.addWidget(start_btn)
     
     def CreateButtons(self):
         for row in range(self.rows):
@@ -214,14 +238,15 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.Buttons[currcell[0]][currcell[1]] = yellowbutton
                 yellowbutton.setEnabled(False)
                 self.layout.addWidget(yellowbutton,currcell[0]+1,currcell[1])
+                loop = QEventLoop()
+                QTimer.singleShot(2, loop.quit)
+                loop.exec_()
 
             elif currentButton.styleSheet().split()[0] == 'background-color:#423e40;':
                 continue
                 
             for d in 'ESNW':
-                loop = QEventLoop()
-                QTimer.singleShot(2, loop.quit)
-                loop.exec_()
+                
                 if d == 'E':
                     childcell = [currcell[0], currcell[1] + 1]
                 elif d == 'S':
@@ -259,10 +284,11 @@ class MyWindow(QtWidgets.QMainWindow):
                     w.Buttons[step[0]][step[1]] = bluebutton
                     bluebutton.setEnabled(False)
                     w.layout.addWidget(bluebutton,step[0]+1,step[1])
+                    loop = QEventLoop()
+                    QTimer.singleShot(70, loop.quit)
+                    loop.exec_()
 
         # self.timerShowPath.stop()
-
-
     def checkNode(self, node):
         currentButton = self.Buttons[node[0]][node[1]]
         if currentButton == 0:
@@ -309,15 +335,14 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.Buttons[node[0]][node[1]] = yellowbutton
                 yellowbutton.setEnabled(False)
                 self.layout.addWidget(yellowbutton,node[0]+1,node[1])
+                loop = QEventLoop()
+                QTimer.singleShot(40, loop.quit)
+                loop.exec_()
             elif currentButton.styleSheet().split()[0] == 'background-color:#423e40;':
                 continue
             dicnode = (node[0], node[1])
             visited[dicnode] = True
             for d in 'ESNW':
-                loop = QEventLoop()
-                QTimer.singleShot(2, loop.quit)
-                loop.exec_()
-
                 if d == 'E':
                     childnode = [node[0], node[1] + 1]
                 elif d == 'S':
@@ -344,8 +369,50 @@ class MyWindow(QtWidgets.QMainWindow):
             dicFood = bfspath[dicFood]
 
         return [fwdpath, foodcell, foodIsFound]
-                
-    def run(self, foodCount, algorithm, startcell):
+
+    def greenPacman(self, startcell):
+        greenbutton = PushButton('', style=w.Styles["Green"],row=startcell[0],column=startcell[1], color="green")
+        w.Buttons[startcell[0]][startcell[1]] = greenbutton
+        greenbutton.setEnabled(False)
+        w.layout.addWidget(greenbutton,startcell[0]+1,startcell[1])
+
+    def buildMap(self, difficulty, foodCount):
+        while self.layout.count():
+            item = self.layout.takeAt(0)
+            widget = item.widget()
+            # if widget.styleSheet().split()[0] == 'background-color:#393a3b;':
+            #     continue
+            if widget is not None:
+                widget.setParent(None)
+
+        loop = QEventLoop()
+
+        self.CreateButtons()
+        wallCount = 100
+        if difficulty == 'Standard':
+            wallCount = 150
+        elif difficulty == 'Hard':
+            wallCount = 200
+        QTimer.singleShot(500, loop.quit)
+        loop.exec_()
+        self.LocateWalls(wallCount)
+        
+        foodCount = int(foodCount)
+        QTimer.singleShot(500, loop.quit)
+        loop.exec_()
+        self.LocateFoods(foodCount)
+
+        QTimer.singleShot(100, loop.quit)
+        loop.exec_()
+        pacman = self.LocatePacMan()
+        self.pacmanRow = pacman[0]
+        self.pacmanColumn = pacman[1]
+        self.startcell = [pacman[0], pacman[1]]
+        self.greenPacman(self.startcell)
+
+    def run(self, foodCount, algorithm):
+        foodCount = int(foodCount)
+        startcell = self.startcell
         if algorithm == 'bfs':
             for i in range(foodCount):
                 res = self.bfs(startcell)
@@ -367,26 +434,13 @@ w = MyWindow()
 w.setWindowTitle('Searchs Algorithm')
 w.show()
 
-statrtedrow = w.pacmanRow
-startedcol = w.pacmanColumn
-greenbutton = PushButton('', style=w.Styles["Green"],row=w.pacmanRow,column=w.pacmanColumn, color="green")
-w.Buttons[w.pacmanRow][w.pacmanColumn] = greenbutton
-greenbutton.setEnabled(False)
-w.layout.addWidget(greenbutton,w.pacmanRow+1,w.pacmanColumn)
 
-startcell = [w.pacmanRow, w.pacmanColumn]
 
-w.run(10, 'bfs', startcell)
-# w.run(10, 'dfs', startcell)
+# startcell = [w.pacmanRow, w.pacmanColumn]
+# w.run(5, 'bfs', startcell)
+# w.run(5, 'dfs', startcell)
 
-# path = w.dfs()
-# res = w.bfs(startcell)
-# print(res[0])
-# print(res[1])
 
-# w.timerShowPath = QTimer(w, interval=1000)
-# w.timerShowPath.timeout.connect(lambda: w.showpath(res[0]))
-# w.timerShowPath.start()
 
 
 sys.exit(app.exec_())
