@@ -119,7 +119,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.vertical.addWidget(self.inWidget)
         self.CreateButtons()
         self.LocateWalls(200)
-        self.LocateFoods(3)
+        self.LocateFoods(5)
         pacman = self.LocatePacMan()
         self.pacmanRow = pacman[0]
         self.pacmanColumn = pacman[1]
@@ -190,10 +190,10 @@ class MyWindow(QtWidgets.QMainWindow):
                 button.setEnabled(False)
                 self.layout.addWidget(button,currrow+1,currcol)
 
-    def dfs(self):
-        startrow = self.pacmanRow
-        startcol = self.pacmanColumn
-
+    def dfs(self, startcell):
+        startrow = startcell[0]
+        startcol = startcell[1]
+        foodIsFound = False
         explored = [[startrow, startcol]]
         frontier = [[startrow, startcol]]
 
@@ -209,6 +209,11 @@ class MyWindow(QtWidgets.QMainWindow):
             if currentButton == 0:
                 continue
             elif currentButton.styleSheet().split()[0] == 'background-color:orange;':
+                redbutton = PushButton('', style=self.Styles["Red"],row=currcell[0],column=currcell[1], color="red")
+                self.Buttons[currcell[0]][currcell[1]] = redbutton
+                redbutton.setEnabled(False)
+                self.layout.addWidget(redbutton,currcell[0]+1,currcell[1])
+                foodIsFound = True
                 break
             elif currentButton.styleSheet().split()[0] == 'background-color:white;':
                 self.Buttons[currcell[0]][currcell[1]] = yellowbutton
@@ -246,7 +251,7 @@ class MyWindow(QtWidgets.QMainWindow):
             fwdpath[dfspath[dicFood]] = dicFood
             dicFood = dfspath[dicFood]
 
-        return fwdpath
+        return [fwdpath, foodcell, foodIsFound]
 
     def showpath(self, path):
         for step in path:
@@ -283,6 +288,7 @@ class MyWindow(QtWidgets.QMainWindow):
         queue = []
         visited = {}
         bfspath = {}
+        foodIsFound = False
         for i in range(0, 20):
             for j in range(0, 30):
                 visited[(i, j)] = False
@@ -298,6 +304,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.Buttons[node[0]][node[1]] = redbutton
                 redbutton.setEnabled(False)
                 self.layout.addWidget(redbutton,node[0]+1,node[1])
+                foodIsFound = True
                 break
             elif currentButton.styleSheet().split()[0] == 'background-color:white;':
                 yellowbutton = PushButton('', style=self.Styles["Yellow"],row=node[0],column=node[1], color="yellow")
@@ -334,7 +341,7 @@ class MyWindow(QtWidgets.QMainWindow):
             fwdpath[bfspath[dicFood]] = dicFood
             dicFood = bfspath[dicFood]
 
-        return [fwdpath, foodcell]
+        return [fwdpath, foodcell, foodIsFound]
                 
     def run(self, foodCount, algorithm, startcell):
         if algorithm == 'bfs':
@@ -343,7 +350,14 @@ class MyWindow(QtWidgets.QMainWindow):
                 # self.timerShowPath = QTimer(w, interval=1000)
                 # self.timerShowPath.timeout.connect(lambda: self.showpath(res[0]))
                 # self.timerShowPath.start()
-                self.showpath(res[0])
+                if res[2] == True:
+                    self.showpath(res[0])
+                startcell = res[1]
+        elif algorithm == 'dfs':
+            for i in range(foodCount):
+                res = self.dfs(startcell)
+                if res[2] == True:
+                    self.showpath(res[0])
                 startcell = res[1]
 
 app = QtWidgets.QApplication(sys.argv)
@@ -358,13 +372,11 @@ w.Buttons[w.pacmanRow][w.pacmanColumn] = greenbutton
 greenbutton.setEnabled(False)
 w.layout.addWidget(greenbutton,w.pacmanRow+1,w.pacmanColumn)
 
-# w.timerDFS = QTimer(w, interval=1000)
-# w.timerDFS.timeout.connect(lambda: w.dfs())
-# w.timerDFS.start()
-
 startcell = [w.pacmanRow, w.pacmanColumn]
 
-w.run(3, 'bfs', startcell)
+# w.run(5, 'bfs', startcell)
+w.run(5, 'dfs', startcell)
+
 # path = w.dfs()
 # res = w.bfs(startcell)
 # print(res[0])
