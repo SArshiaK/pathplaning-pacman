@@ -2,6 +2,7 @@ from select import select
 from socket import timeout
 import sys
 from tkinter import E
+from unittest import result
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import *
 from PyQt5.QtCore import QTimer
@@ -103,6 +104,12 @@ class MyWindow(QtWidgets.QMainWindow):
                 max-width:35px;
                 border :0.45px solid gray;
                 """,
+            "Red":"""
+                background-color:red;
+                max-height:35px;
+                max-width:35px;
+                border :0.45px solid gray;
+                """,
                 
             }
         Widget= QtWidgets.QWidget()
@@ -112,7 +119,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.vertical.addWidget(self.inWidget)
         self.CreateButtons()
         self.LocateWalls(200)
-        self.LocateFoods(1)
+        self.LocateFoods(3)
         pacman = self.LocatePacMan()
         self.pacmanRow = pacman[0]
         self.pacmanColumn = pacman[1]
@@ -245,12 +252,12 @@ class MyWindow(QtWidgets.QMainWindow):
         for step in path:
             if(step[0] != w.pacmanRow or step[1] != w.pacmanColumn):
                 bluebutton = PushButton('', style=w.Styles["Blue"],row=step[0],column=step[1], color="blue")
-    
-                w.Buttons[step[0]][step[1]] = bluebutton
-                bluebutton.setEnabled(False)
-                w.layout.addWidget(bluebutton,step[0]+1,step[1])
+                if(w.Buttons[step[0]][step[1]].styleSheet().split()[0] == 'background-color:yellow;'):
+                    w.Buttons[step[0]][step[1]] = bluebutton
+                    bluebutton.setEnabled(False)
+                    w.layout.addWidget(bluebutton,step[0]+1,step[1])
 
-        self.timerShowPath.stop()
+        # self.timerShowPath.stop()
 
 
     def checkNode(self, node):
@@ -259,6 +266,12 @@ class MyWindow(QtWidgets.QMainWindow):
             return 'index'
         elif currentButton.styleSheet().split()[0] == 'background-color:orange;':
             return 'food'
+        elif currentButton.styleSheet().split()[0] == 'background-color:red;':
+            return 'foundfood'
+        elif currentButton.styleSheet().split()[0] == 'background-color:#03fc77;':
+            return 'foundpath'
+        elif currentButton.styleSheet().split()[0] == 'background-color:yellow;':
+            return 'visitedpath'
         elif currentButton.styleSheet().split()[0] == 'background-color:#423e40;':
             return 'wall'
         elif currentButton.styleSheet().split()[0] == 'background-color:white;':
@@ -266,14 +279,13 @@ class MyWindow(QtWidgets.QMainWindow):
         elif currentButton.styleSheet().split()[0] == 'background-color:green;':
             return 'start'
 
-    def bfs(self):
+    def bfs(self, startcell):
         queue = []
         visited = {}
+        bfspath = {}
         for i in range(0, 20):
             for j in range(0, 30):
                 visited[(i, j)] = False
-        path = {}
-        startcell = [self.pacmanRow, self.pacmanColumn]
         queue.append(startcell)
         while len(queue) > 0:
             node = queue.pop(0)
@@ -282,6 +294,10 @@ class MyWindow(QtWidgets.QMainWindow):
             if currentButton == 0:
                 continue
             elif currentButton.styleSheet().split()[0] == 'background-color:orange;':
+                redbutton = PushButton('', style=self.Styles["Red"],row=node[0],column=node[1], color="red")
+                self.Buttons[node[0]][node[1]] = redbutton
+                redbutton.setEnabled(False)
+                self.layout.addWidget(redbutton,node[0]+1,node[1])
                 break
             elif currentButton.styleSheet().split()[0] == 'background-color:white;':
                 yellowbutton = PushButton('', style=self.Styles["Yellow"],row=node[0],column=node[1], color="yellow")
@@ -304,13 +320,31 @@ class MyWindow(QtWidgets.QMainWindow):
 
                 dicChild = (childnode[0], childnode[1])
                 checknode = self.checkNode(childnode)
-                if((checknode == 'path' or checknode == 'food' or checknode == 'start') and visited[dicChild] == False):
-                    path[dicChild] = dicnode
+                if((checknode == 'path' or checknode == 'food' or checknode == 'start' or checknode == 'foundfood' or checknode == 'foundpath' or checknode == 'visitedpath') and visited[dicChild] == False):
+                # if checknode != 'index' and checknode != None:
+                    bfspath[dicChild] = dicnode
                     if childnode not in queue:
                         queue.append(childnode)
-                    # print(queue)
-                # visited[dicChild] = True
+        
+        fwdpath = {}
+        foodcell = [node[0], node[1]]
+        dicFood = (foodcell[0], foodcell[1])
+        dicStart = (startcell[0], startcell[1])
+        while(dicFood != dicStart):
+            fwdpath[bfspath[dicFood]] = dicFood
+            dicFood = bfspath[dicFood]
+
+        return [fwdpath, foodcell]
                 
+    def run(self, foodCount, algorithm, startcell):
+        if algorithm == 'bfs':
+            for i in range(foodCount):
+                res = self.bfs(startcell)
+                # self.timerShowPath = QTimer(w, interval=1000)
+                # self.timerShowPath.timeout.connect(lambda: self.showpath(res[0]))
+                # self.timerShowPath.start()
+                self.showpath(res[0])
+                startcell = res[1]
 
 app = QtWidgets.QApplication(sys.argv)
 w = MyWindow()
@@ -328,13 +362,18 @@ w.layout.addWidget(greenbutton,w.pacmanRow+1,w.pacmanColumn)
 # w.timerDFS.timeout.connect(lambda: w.dfs())
 # w.timerDFS.start()
 
+startcell = [w.pacmanRow, w.pacmanColumn]
+
+w.run(3, 'bfs', startcell)
 # path = w.dfs()
+# res = w.bfs(startcell)
+# print(res[0])
+# print(res[1])
 
 # w.timerShowPath = QTimer(w, interval=1000)
-# w.timerShowPath.timeout.connect(lambda: w.showpath(path))
+# w.timerShowPath.timeout.connect(lambda: w.showpath(res[0]))
 # w.timerShowPath.start()
 
-w.bfs()
 
 sys.exit(app.exec_())
 
