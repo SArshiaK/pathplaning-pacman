@@ -88,7 +88,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 background-color:#423e40;
                 max-height:35px;
                 max-width:35px;
-                border :0.50px solid #423e40;
+                border :0.50px solid gray;
                 """,
             "Green":"""
                 background-color:green;
@@ -125,28 +125,28 @@ class MyWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(Widget)
         
         # Combo Boxes
-        combobox_algorithm = QtWidgets.QComboBox(self)
-        combobox_algorithm.setGeometry(50, 50, 60, 60)
-        combobox_algorithm.addItems(['bfs', 'dfs'])
-        self.vertical.addWidget(combobox_algorithm)
+        self.combobox_algorithm = QtWidgets.QComboBox(self)
+        self.combobox_algorithm.setGeometry(50, 50, 60, 60)
+        self.combobox_algorithm.addItems(['bfs', 'dfs'])
+        self.vertical.addWidget(self.combobox_algorithm)
 
-        combobox_difficulty = QtWidgets.QComboBox(self)
-        combobox_difficulty.setGeometry(50, 50, 60, 60)
-        combobox_difficulty.addItems(['Easy', 'Standard', 'Hard'])
-        self.vertical.addWidget(combobox_difficulty)
+        self.combobox_difficulty = QtWidgets.QComboBox(self)
+        self.combobox_difficulty.setGeometry(50, 50, 60, 60)
+        self.combobox_difficulty.addItems(['Easy', 'Standard', 'Hard'])
+        self.vertical.addWidget(self.combobox_difficulty)
 
-        combobox_food = QtWidgets.QComboBox(self)
-        combobox_food.setGeometry(50, 50, 60, 60)
-        combobox_food.addItems(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'])
-        self.vertical.addWidget(combobox_food)
+        self.combobox_food = QtWidgets.QComboBox(self)
+        self.combobox_food.setGeometry(50, 50, 60, 60)
+        self.combobox_food.addItems(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'])
+        self.vertical.addWidget(self.combobox_food)
         
         # Build Button
-        build_btn = QtWidgets.QPushButton("Build", clicked = lambda: self.buildMap(combobox_difficulty.currentText(), combobox_food.currentText()))
-        self.vertical.addWidget(build_btn)
+        self.build_btn = QtWidgets.QPushButton("Build", clicked = lambda: self.buildMap(self.combobox_difficulty.currentText(), self.combobox_food.currentText()))
+        self.vertical.addWidget(self.build_btn)
 
         # Start Button
-        start_btn = QtWidgets.QPushButton("Start", clicked = lambda: self.run(combobox_food.currentText(), combobox_algorithm.currentText()))
-        self.vertical.addWidget(start_btn)
+        self.start_btn = QtWidgets.QPushButton("Start", clicked = lambda: self.run(self.combobox_food.currentText(), self.combobox_algorithm.currentText()))
+        self.vertical.addWidget(self.start_btn)
     
     def CreateButtons(self):
         for row in range(self.rows):
@@ -377,6 +377,11 @@ class MyWindow(QtWidgets.QMainWindow):
         w.layout.addWidget(greenbutton,startcell[0]+1,startcell[1])
 
     def buildMap(self, difficulty, foodCount):
+        self.combobox_algorithm.hide()
+        self.combobox_difficulty.hide()
+        self.combobox_food.hide()
+        self.build_btn.hide()
+
         while self.layout.count():
             item = self.layout.takeAt(0)
             widget = item.widget()
@@ -411,6 +416,10 @@ class MyWindow(QtWidgets.QMainWindow):
         self.greenPacman(self.startcell)
 
     def run(self, foodCount, algorithm):
+        loop = QEventLoop()
+
+        self.start_btn.hide()
+
         foodCount = int(foodCount)
         startcell = self.startcell
         if algorithm == 'bfs':
@@ -428,6 +437,16 @@ class MyWindow(QtWidgets.QMainWindow):
                 if res[2] == True:
                     self.showpath(res[0])
                 startcell = res[1]
+
+        QTimer.singleShot(1000, loop.quit)
+        loop.exec_()
+
+        self.combobox_algorithm.show()
+        self.combobox_difficulty.show()
+        self.combobox_food.show()
+        self.build_btn.show()
+        self.start_btn.show()
+
 
 app = QtWidgets.QApplication(sys.argv)
 w = MyWindow()
