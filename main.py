@@ -18,40 +18,6 @@ class PushButton(QtWidgets.QPushButton):
         self.setMaximumSize(QSize(35, 35))
         self.color = color
 
-
-def directions(direction, currrow, currcol):
-    if(direction == 1):
-        currrow = up(currrow)
-    elif(direction == 2):
-        currrow = down(currrow)
-    elif(direction == 3):
-        currcol = left(currcol)
-    elif(direction == 4):
-        currcol = right(currcol)
-
-    return [currrow, currcol]
-
-
-def up(currrow):
-    currrow -= 1
-    return currrow
-
-
-def down(currrow):
-    currrow -= 1
-    return currrow
-
-
-def left(currcol):
-    currcol -= 1
-    return currcol
-
-
-def right(currcol):
-    currcol -= 1
-    return currcol
-
-
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
@@ -126,8 +92,6 @@ class MyWindow(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QGridLayout(self.inWidget)
         self.vertical.addWidget(self.inWidget)
         self.CreateButtons()
-
-        startcell = None
 
         Widget.setLayout(self.vertical)
         self.setCentralWidget(Widget)
@@ -204,29 +168,6 @@ class MyWindow(QtWidgets.QMainWindow):
         button.setEnabled(False)
         self.layout.addWidget(button, pacmanRow+1, pacmanColumn)
         return [pacmanRow, pacmanColumn]
-
-    def move(self):
-        currrow = self.pacmanRow
-        currcol = self.pacmanColumn
-
-        for i in range(0, 10):
-            direction = random.randint(1, 4)
-            coordinates = directions(direction, currrow, currcol)
-            currrow = coordinates[0]
-            currcol = coordinates[1]
-
-            button = PushButton(
-                '', style=self.Styles["Yellow"], row=currrow, column=currcol, color="yellow")
-            currentButton = self.Buttons[currrow][currcol]
-
-            if(currentButton == 0):
-                continue
-            elif(currentButton.styleSheet().split()[0] == 'background-color:#423e40;'):
-                continue
-            else:
-                self.Buttons[currrow][currcol] = button
-                button.setEnabled(False)
-                self.layout.addWidget(button, currrow+1, currcol)
 
     def dfs(self, startcell):
         startrow = startcell[0]
@@ -311,8 +252,6 @@ class MyWindow(QtWidgets.QMainWindow):
                     loop.exec_()
 
                     showedPath.append([step[0], step[1]])
-        # showedPath = showedPath.reverse()
-        # self.timerShowPath.stop()
         self.showSteps(showedPath)
 
     def showSteps(self, showedPath):
@@ -436,11 +375,11 @@ class MyWindow(QtWidgets.QMainWindow):
         loop = QEventLoop()
 
         self.CreateButtons()
-        wallCount = 100
+        wallCount = 80
         if difficulty == 'Standard':
-            wallCount = 150
+            wallCount = 110
         elif difficulty == 'Hard':
-            wallCount = 200
+            wallCount = 150
         QTimer.singleShot(500, loop.quit)
         loop.exec_()
         self.LocateWalls(wallCount)
@@ -482,8 +421,6 @@ class MyWindow(QtWidgets.QMainWindow):
         elif algorithm == 'A*':
             for i in range(foodCount):
                 nesrestfood = self.nearestFood(startcell)
-                # print(startcell)
-                # print(nesrestfood)
                 res = self.aStar(startcell, nesrestfood)
                 if res[2] == True:
                     self.showpath(res[0])
@@ -510,7 +447,6 @@ class MyWindow(QtWidgets.QMainWindow):
         nearestFood = foods[0]
         distance = 9999999
         for i in range(len(foods)):
-            # print(foods)
             if foods[i][2] == False:
                 foodcell = (foods[i][0], foods[i][1])
                 manhattanDistance = self.h(startcell, foodcell)
@@ -518,10 +454,7 @@ class MyWindow(QtWidgets.QMainWindow):
                     distance = manhattanDistance
                     nearestFood = foodcell
         for i in range(len(foods)):
-            # print(foods[i])
-            # print(nearestFood)
             if foods[i] == [nearestFood[0], nearestFood[1], False]:
-            #    print('asfjksagjfsa')
                self.foods[i][2] = True
         return nearestFood
 
@@ -600,11 +533,5 @@ app = QtWidgets.QApplication(sys.argv)
 w = MyWindow()
 w.setWindowTitle('Searchs Algorithm')
 w.show()
-
-
-# startcell = [w.pacmanRow, w.pacmanColumn]
-# w.run(5, 'bfs', startcell)
-# w.run(5, 'dfs', startcell)
-
 
 sys.exit(app.exec_())
