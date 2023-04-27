@@ -443,9 +443,9 @@ class MyWindow(QtWidgets.QMainWindow):
                 if manhattanDistance < distance:
                     distance = manhattanDistance
                     nearestFood = foodcell
-        for i in range(len(foods)):
-            if foods[i] == [nearestFood[0], nearestFood[1], False]:
-               self.foods[i][2] = True
+        # for i in range(len(foods)):
+        #     if foods[i] == [nearestFood[0], nearestFood[1], False]:
+        #        self.foods[i][2] = True
         return nearestFood
 
     def aStar(self, startCell, food):
@@ -480,6 +480,10 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.layout.addWidget(
                     redbutton, currCell[0]+1, currCell[1])
                 foodIsFound = True
+                foods = self.foods
+                for i in range(len(foods)):
+                    if foods[i] == [currCell[0], currCell[1], False]:
+                       self.foods[i][2] = True
                 break
             elif currentButton.styleSheet().split()[0] == 'background-color:white;':
                 yellowbutton = PushButton('', style=self.Styles["Yellow"], row=currCell[0], column=currCell[1], color="yellow")
