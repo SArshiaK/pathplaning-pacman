@@ -153,8 +153,7 @@ class MyWindow(QtWidgets.QMainWindow):
             foodRow = random.randint(1, 18)
             foodColumn = random.randint(1, 28)
             self.foods.append([foodRow, foodColumn, False])
-            button = PushButton(
-                '', style=self.Styles["Orange"], row=foodRow, column=foodColumn, color="orange")
+            button = PushButton('', style=self.Styles["Orange"], row=foodRow, column=foodColumn, color="orange")
             self.Buttons[foodRow][foodColumn] = button
             button.setEnabled(False)
             self.layout.addWidget(button, foodRow+1, foodColumn)
@@ -162,8 +161,7 @@ class MyWindow(QtWidgets.QMainWindow):
     def LocatePacMan(self):
         pacmanRow = random.randint(1, 18)
         pacmanColumn = random.randint(1, 28)
-        button = PushButton(
-            '', style=self.Styles["Yellow"], row=pacmanRow, column=pacmanColumn, color="yellow")
+        button = PushButton('', style=self.Styles["Green"], row=pacmanRow, column=pacmanColumn, color="green")
         self.Buttons[pacmanRow][pacmanColumn] = button
         button.setEnabled(False)
         self.layout.addWidget(button, pacmanRow+1, pacmanColumn)
@@ -350,13 +348,6 @@ class MyWindow(QtWidgets.QMainWindow):
 
         return [fwdpath, foodcell, foodIsFound]
 
-    def greenPacman(self, startcell):
-        greenbutton = PushButton(
-            '', style=self.Styles["Green"], row=startcell[0], column=startcell[1], color="green")
-        self.Buttons[startcell[0]][startcell[1]] = greenbutton
-        greenbutton.setEnabled(False)
-        self.layout.addWidget(greenbutton, startcell[0]+1, startcell[1])
-
     def buildMap(self, difficulty, foodCount):
         self.combobox_algorithm.hide()
         self.combobox_difficulty.hide()
@@ -395,7 +386,6 @@ class MyWindow(QtWidgets.QMainWindow):
         self.pacmanRow = pacman[0]
         self.pacmanColumn = pacman[1]
         self.startcell = [pacman[0], pacman[1]]
-        self.greenPacman(self.startcell)
         self.start_btn.show()
 
     def run(self, foodCount, algorithm):
@@ -433,7 +423,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.combobox_difficulty.show()
         self.combobox_food.show()
         self.build_btn.show()
-        self.start_btn.show()
+        # self.start_btn.show()
         self.count = 1
         self.foods = []
 
